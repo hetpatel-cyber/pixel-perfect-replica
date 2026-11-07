@@ -5,10 +5,10 @@ import { Header, WhatsAppFab } from "@/components/site/chrome";
 import { SPECIALTIES } from "@/lib/site-data";
 import { cn } from "@/lib/utils";
 
-type Search = { specialty?: string };
+type Search = { specialty?: string | undefined };
 
 export const Route = createFileRoute("/book")({
-  validateSearch: (s: Record<string, unknown>): Search => ({ specialty: typeof s.specialty === "string" ? s.specialty : undefined }),
+  validateSearch: (s: Record<string, unknown>): Search => ({ specialty: typeof s["specialty"] === "string" ? s["specialty"] : undefined }),
   head: () => ({
     meta: [
       { title: "Request a Consultation — Aarogya Global Care" },
