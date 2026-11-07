@@ -23,7 +23,7 @@ export const Route = createFileRoute("/book")({
 const STEPS = ["Patient", "Treatment", "Reports", "Preferences", "Confirm"];
 const MAX_MB = 10;
 const OK_TYPES = ["application/pdf", "image/jpeg", "image/png"];
-type Up = { name: string; size: number; progress: number; error?: string };
+type Up = { name: string; size: number; progress: number; error?: string | undefined };
 
 const initial = {
   name: "", email: "", country: "", code: "+", phone: "", age: "", gender: "",
@@ -33,8 +33,8 @@ const initial = {
 };
 type F = typeof initial;
 
-function validate(step: number, f: F): Record<string, string> {
-  const e: Record<string, string> = {};
+function validate(step: number, f: F): Partial<Record<keyof F, string>> {
+  const e: Partial<Record<keyof F, string>> = {};
   if (step === 0) {
     if (f.name.trim().length < 2) e.name = "Please enter your full name.";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) e.email = "Please enter a valid email.";
@@ -64,7 +64,7 @@ function BookPage() {
   const search = Route.useSearch();
   const [step, setStep] = useState(0);
   const [f, setF] = useState<F>({ ...initial, specialty: SPECIALTIES.some((s) => s.slug === search.specialty) ? search.specialty! : "" });
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof F, string>>>({});
   const [files, setFiles] = useState<Up[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [ref, setRef] = useState<string | null>(null);
@@ -77,7 +77,7 @@ function BookPage() {
     if (!list) return;
     Array.from(list).forEach((file) => {
       const err = !OK_TYPES.includes(file.type) ? "Unsupported type — PDF, JPG or PNG only." : file.size > MAX_MB * 1024 * 1024 ? `Exceeds ${MAX_MB} MB limit.` : undefined;
-      const item: Up = { name: file.name, size: file.size, progress: err ? 0 : 0, error: err };
+      const item: Up = { name: file.name, size: file.size, progress: 0, ...(err ? { error: err } : {}) };
       setFiles((p) => [...p, item]);
       if (err) return;
       // Demo mode: simulated progress. Files stay in the browser and are never uploaded.
@@ -219,7 +219,7 @@ function BookPage() {
 
 const inp = "w-full rounded-xl border bg-background px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/20 disabled:opacity-50";
 const Grid = ({ children }: { children: ReactNode }) => <div className="grid gap-5 sm:grid-cols-2">{children}</div>;
-function Field({ label, err, full, children }: { label: string; err?: string; full?: boolean; children: ReactNode }) {
+function Field({ label, err, full, children }: { label: string; err?: string | undefined; full?: boolean; children: ReactNode }) {
   return <label className={cn("block", full && "sm:col-span-2")}><span className="mb-2 block text-sm font-semibold">{label}</span>{children}{err && <span className="mt-1.5 block text-xs text-destructive" role="alert">{err}</span>}</label>;
 }
 function Pills({ opts, v, on }: { opts: string[]; v: string; on: (v: string) => void }) {
@@ -228,6 +228,6 @@ function Pills({ opts, v, on }: { opts: string[]; v: string; on: (v: string) => 
 function Summary({ title, rows }: { title: string; rows: [string, string][] }) {
   return <div><p className="eyebrow">{title}</p><dl className="mt-3 divide-y rounded-xl border">{rows.map(([k, v]) => <div key={k} className="grid grid-cols-3 gap-4 px-4 py-3 text-sm"><dt className="text-muted-foreground">{k}</dt><dd className="col-span-2 break-words">{v || "—"}</dd></div>)}</dl></div>;
 }
-function Consent({ checked, on, err, children }: { checked: boolean; on: (v: boolean) => void; err?: string; children: ReactNode }) {
+function Consent({ checked, on, err, children }: { checked: boolean; on: (v: boolean) => void; err?: string | undefined; children: ReactNode }) {
   return <label className="flex gap-3 text-sm"><input type="checkbox" checked={checked} onChange={(e) => on(e.target.checked)} className="mt-0.5 h-5 w-5 accent-primary" /><span>{children}{err && <span className="block text-xs text-destructive">{err}</span>}</span></label>;
 }
