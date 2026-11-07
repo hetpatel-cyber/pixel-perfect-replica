@@ -371,7 +371,7 @@ function Gallery() {
       {open !== null && (
         <div className="fixed inset-0 z-[60] grid place-items-center bg-ink/90 p-5" role="dialog" aria-modal="true" onClick={() => setOpen(null)}>
           <button className="absolute right-5 top-5 grid h-11 w-11 place-items-center rounded-full bg-ink-foreground text-ink" aria-label="Close"><X className="h-5 w-5" /></button>
-          <img src={imgs[open].src} alt={imgs[open].a} className="max-h-[85vh] max-w-full rounded-2xl" />
+          <img src={imgs[open]!.src} alt={imgs[open]!.a} className="max-h-[85vh] max-w-full rounded-2xl" />
         </div>
       )}
     </Section>
